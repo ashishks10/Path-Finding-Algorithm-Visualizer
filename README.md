@@ -1,2 +1,2 @@
 # Path-Finding-Algorithm-Visualizer
-An application for visualizing some Path Finding Algorithms
+This application (made using Python programming language) provides a visual demonstration for some Path Finding Algorithms.
