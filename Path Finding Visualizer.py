@@ -126,24 +126,24 @@ def reconstruct_path(came_from, current, draw, time_delay):
 
 def A_star_algorithm(draw, grid, start, end, time_delay):
 	count = 0
-	open_set = PriorityQueue()
-	open_set.put((0, count, start))
+	pq = PriorityQueue()
+	pq.put((0, count, start))
 	came_from = {}
 	g_score = {spot: float("inf") for row in grid for spot in row}
 	g_score[start] = 0
 	f_score = {spot: float("inf") for row in grid for spot in row}
 	f_score[start] = h(start, end)
-	open_set_hash = {}
+	visited = {}
 
-	while not open_set.empty():
+	while not pq.empty():
 		time.sleep(time_delay)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
-		current = open_set.get()[2]
-		if current in open_set_hash:
+		current = pq.get()[2]
+		if current in visited:
 			continue
-		open_set_hash[current]=1;
+		visited[current]=1;
 		Text4.setValue(str(current.get_pos()[0]+1)+', '+ str(current.get_pos()[1]+1))
 
 		if current == end:
@@ -154,14 +154,13 @@ def A_star_algorithm(draw, grid, start, end, time_delay):
 
 		for neighbor in current.neighbors:
 			temp_g_score = g_score[current] + 1
-
 			if temp_g_score < g_score[neighbor]: 
 				g_score[neighbor] = temp_g_score
 				f_score[neighbor] = temp_g_score + h(neighbor, end)
 				came_from[neighbor] = current
-				if neighbor not in open_set_hash:
+				if neighbor not in visited:
 					count -= 1
-					open_set.put((f_score[neighbor], count, neighbor))
+					pq.put((f_score[neighbor], count, neighbor))
 					neighbor.make_open()
 		draw()
 
@@ -174,21 +173,23 @@ def A_star_algorithm(draw, grid, start, end, time_delay):
 
 def greedy_Best_First_Search_algorithm(draw, grid, start, end, time_delay):
 	count = 0
-	open_set = PriorityQueue()
-	open_set.put((0, count, start))
+	pq = PriorityQueue()
+	pq.put((0, count, start))
 	came_from = {}
 	f_score = {spot: float("inf") for row in grid for spot in row}
 	f_score[start] = h(start, end)
-	open_set_hash = {start}
+	visited = {}
 
-	while not open_set.empty():
+	while not pq.empty():
 		time.sleep(time_delay)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 
-		current = open_set.get()[2]
-		open_set_hash.remove(current)
+		current = pq.get()[2]
+		if current in visited:
+			continue;
+		visited[current]=1
 		Text4.setValue(str(current.get_pos()[0]+1)+', '+ str(current.get_pos()[1]+1))
 
 		if current == end:
@@ -203,10 +204,9 @@ def greedy_Best_First_Search_algorithm(draw, grid, start, end, time_delay):
 			if temp_f_score < f_score[neighbor]: 
 				f_score[neighbor] = h(neighbor, end)
 				came_from[neighbor] = current
-				if neighbor not in open_set_hash:
+				if neighbor not in visited:
 					count += 1
-					open_set.put((f_score[neighbor], count, neighbor))
-					open_set_hash.add(neighbor)
+					pq.put((f_score[neighbor], count, neighbor))
 					neighbor.make_open()
 
 		draw()
@@ -221,8 +221,8 @@ def greedy_Best_First_Search_algorithm(draw, grid, start, end, time_delay):
 
 def Dijkstras_algorithm(draw, grid, start, end, time_delay):
 	count = 0
-	open_set = PriorityQueue()
-	open_set.put((0, count, start))
+	pq = PriorityQueue()
+	pq.put((0, count, start))
 	came_from = {}
 	distance = {spot: float("inf") for row in grid for spot in row}
 	distance[start] = 0
@@ -230,13 +230,13 @@ def Dijkstras_algorithm(draw, grid, start, end, time_delay):
 
 	open_set_hash = {start}
 	
-	while not open_set.empty():
+	while not pq.empty():
 		time.sleep(time_delay)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 
-		current = open_set.get()[2]
+		current = pq.get()[2]
 		open_set_hash.remove(current)
 		Text4.setValue(str(current.get_pos()[0]+1)+', '+ str(current.get_pos()[1]+1))
 
@@ -251,12 +251,12 @@ def Dijkstras_algorithm(draw, grid, start, end, time_delay):
 			if temp_distance < distance[neighbor]:
 				count+=1
 				if neighbor in open_set_hash:
-					count = open_set.get()[1]
-					open_set.remove((distance[neighbor], count, neighbor))
+					count = pq.get()[1]
+					pq.remove((distance[neighbor], count, neighbor))
 				open_set_hash.add(neighbor)
 				distance[neighbor] = temp_distance	
 				came_from[neighbor] = current
-				open_set.put((distance[neighbor], count, neighbor))
+				pq.put((distance[neighbor], count, neighbor))
 				neighbor.make_open()
 
 		draw()
@@ -273,8 +273,7 @@ def BFS_algorithm(draw, grid, start, end, time_delay):
 	queue = Queue()
 	queue.put(start)
 	came_from = {}
-
-	open_set_hash = {start}
+	added = {start}
 
 	while not queue.empty():
 		time.sleep(time_delay)
@@ -292,10 +291,10 @@ def BFS_algorithm(draw, grid, start, end, time_delay):
 			return True
 
 		for neighbor in current.neighbors:
-			if neighbor not in open_set_hash:
+			if neighbor not in added:
 				came_from[neighbor] = current
 				queue.put(neighbor)
-				open_set_hash.add(neighbor)
+				added.add(neighbor)
 				neighbor.make_open()
 
 		draw()
